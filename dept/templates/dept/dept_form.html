@@ -1,0 +1,44 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Create</h4>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Create Dept</h5>
+            <div id="message-area"></div>
+            <form
+              hx-post="{% url 'create_dept' %}"
+              hx-target="#content"
+              hx-swap="innerHTML"
+            >
+              {% csrf_token %}              
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">Nama</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nama_dept"
+                  name="nama_dept"
+                  placeholder="Enter your dept name"
+                  required
+                />
+              </div>
+              <a
+                href="#"
+                hx-get="{% url 'dept' %}"
+                hx-target="#content"
+                hx-swap="innerHTML"
+                class="btn btn-info"
+                >Cancel</a
+              >
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

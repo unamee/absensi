@@ -1,0 +1,75 @@
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+
+<table id="employeeTable" class="table">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Name</th>
+      <th>Is Staff</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in employees %}
+    <tr>
+      <td>{{ u.user.username }}</td>
+      <td>{{ u.user.email }}</td>
+      <td>{{ u.user.first_name }} {{ u.user.last_name }}</td>
+      <td>{{ u.user.is_staff }}</td>
+      <td>
+        <button
+          class="btn btn-warning btn-sm"
+          hx-get="{% url 'update-employee' u.id %}"
+          hx-target="#content"
+          hx-trigger="click"
+        >
+          Update
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+        <button
+          class="btn btn-danger btn-sm"
+          hx-post="{% url 'delete-employee' u.id %}"
+          hx-target="#content"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-confirm="Are you sure?"
+        >
+          Delete
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  $(document).ready(function () {
+    $("#employeeTable").DataTable({
+      destroy: true, // reset tabel lama
+      pageLength: 10, // jumlah baris per halaman
+      lengthMenu: [5, 10, 25, 50, 100],
+      ordering: true, // aktifkan sorting
+      searching: true, // aktifkan pencarian
+      language: {
+        search: "Cari:",
+        lengthMenu: "Tampilkan _MENU_ data per halaman",
+        info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+        paginate: {
+          first: "Pertama",
+          last: "Terakhir",
+          next: "Berikutnya",
+          previous: "Sebelumnya",
+        },
+      },
+    });
+  });
+</script>

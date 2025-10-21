@@ -1,0 +1,109 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Update Employee: {{ employee.username }}</h4>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">User Information</h5>
+            <form
+              hx-post="{% url 'update-employee' employee.employee.id %}"
+              hx-target="#content"
+              hx-swap="innerHTML"
+            >
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  placeholder="Enter your Username"
+                  name="username"
+                  value="{{ employee.username }}"
+                  disabled
+                />
+              </div>
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  placeholder="Enter your password"
+                  name="password"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">ID Karyawan</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="id_karyawan"
+                  placeholder="Enter your ID Karyawan"
+                  name="id_karyawan"
+                  value="{{ employee.employee.id_karyawan }}"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="firstname"
+                  placeholder="Enter your first name"
+                  name="first_name"
+                  value="{{ employee.first_name }}"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">Last Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="lastname"
+                  name="last_name"
+                  placeholder="Enter your last name"
+                  value="{{ employee.last_name }}"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="emailInput" class="form-label">Email address</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="emailInput"
+                  name="email"
+                  placeholder="name@example.com"
+                  value="{{ employee.email }}"
+                />
+              </div>
+              {% comment %} <div class="mb-3">
+                <label for="messageTextarea" class="form-label">Message</label>
+                <textarea
+                  class="form-control"
+                  id="messageTextarea"
+                  rows="3"
+                ></textarea>
+              </div> {% endcomment %}
+              <a
+                href="#"
+                hx-get="{% url 'employee' %}"
+                hx-target="#content"
+                hx-swap="innerHTML"
+                class="btn btn-info"
+                >Cancel</a
+              >
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger">{{ form.errors }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

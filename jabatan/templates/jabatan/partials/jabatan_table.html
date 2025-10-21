@@ -1,0 +1,68 @@
+<!-- Messages -->
+<div>
+  {% if messages %} {% for message in messages %}
+  <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %} {% endif %}
+</div>
+
+<table id="jabatanTable" class="table">
+  <thead>
+    <tr>
+      <th>Kode Jabatan</th>
+      <th>Nama Jabatan</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in jabatan %}
+    <tr>
+      <td>{{ u.kode_jabatan }}</td>
+      <td>{{ u.nama_jabatan }}</td>
+      <td>
+        <button
+          class="btn btn-warning btn-sm"
+          hx-get="{% url 'update-jabatan' u.id_jabatan %}"
+          hx-target="#content"
+          hx-trigger="click"
+        >
+          Update
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+        <button
+          class="btn btn-danger btn-sm"
+          hx-post="{% url 'delete-jabatan' u.id_jabatan %}"
+          hx-target="#content"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-confirm="Are you sure?"
+        >
+          Delete
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  $(document).ready(function () {
+    $("#jabatanTable").DataTable({
+      destroy: true, // reset tabel lama
+      pageLength: 10, // jumlah baris per halaman
+      lengthMenu: [5, 10, 25, 50, 100],
+      ordering: true, // aktifkan sorting
+      searching: true, // aktifkan pencarian
+      language: {
+        search: "Cari:",
+        lengthMenu: "Tampilkan _MENU_ data per halaman",
+        info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+        paginate: {
+          first: "Pertama",
+          last: "Terakhir",
+          next: "Berikutnya",
+          previous: "Sebelumnya",
+        },
+      },
+    });
+  });
+</script>

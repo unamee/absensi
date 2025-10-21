@@ -1,0 +1,15 @@
+<!-- Add Button Form -->
+<button
+  class="btn btn-primary"
+  hx-get="{% url 'create_jabatan' %}"
+  hx-target="#content"
+  hx-swap="innerHTML"
+>
+  <i class="fa-solid fa-plus"></i>
+  Create
+</button>
+
+<!-- Table -->
+<div id="jabatan-table" class="mt-3">
+  {% include "jabatan/partials/jabatan_table.html" %}
+</div>
