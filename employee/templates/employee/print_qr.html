@@ -1,0 +1,10 @@
+<!-- print qr -->
+<h3>{{ employee.user.get_full_name|default:employee.user.username }}</h3>
+<p>ID: {{ employee.id_karyawan }}</p>
+<img
+  src="{{ employee.qr_code.url }}"
+  class="img-fluid"
+  style="max-width: 250px"
+/>
+<br /><br />
+<button class="btn btn-primary" onclick="window.print()">Print QR Code</button>

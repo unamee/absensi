@@ -27,6 +27,15 @@
       <td>{{ u.user.is_staff }}</td>
       <td>
         <button
+          class="btn btn-info btn-sm"
+          hx-get="{% url 'info-employee' u.id %}"
+          hx-target="#content"
+          hx-trigger="click"
+        >
+          View
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+        <button
           class="btn btn-warning btn-sm"
           hx-get="{% url 'update-employee' u.id %}"
           hx-target="#content"

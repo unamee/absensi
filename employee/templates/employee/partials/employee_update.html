@@ -12,6 +12,7 @@
               hx-post="{% url 'update-employee' employee.employee.id %}"
               hx-target="#content"
               hx-swap="innerHTML"
+              enctype="multipart/form-data"
             >
               {% csrf_token %}
               <div class="mb-3">
@@ -80,14 +81,32 @@
                   value="{{ employee.email }}"
                 />
               </div>
-              {% comment %} <div class="mb-3">
+              <!-- Foto -->
+              <div class="mb-3 text-center">
+                <label class="form-label fw-bold">Current Photo</label><br />
+                <img
+                  src="{{ employee.employee.photo.url }}"
+                  alt="Employee Photo"
+                  class="img-thumbnail mb-2"
+                  style="width: 150px; height: 150px; object-fit: cover"
+                />
+                <input
+                  type="file"
+                  class="form-control mt-2"
+                  name="photo"
+                  accept="image/*"
+                />
+              </div>
+              {% comment %}
+              <div class="mb-3">
                 <label for="messageTextarea" class="form-label">Message</label>
                 <textarea
                   class="form-control"
                   id="messageTextarea"
                   rows="3"
                 ></textarea>
-              </div> {% endcomment %}
+              </div>
+              {% endcomment %}
               <a
                 href="#"
                 hx-get="{% url 'employee' %}"

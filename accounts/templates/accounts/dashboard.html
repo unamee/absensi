@@ -58,6 +58,12 @@
       .collapse.show {
         transition: height 0.3s ease;
       }
+
+      @media print {
+        .btn {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -89,6 +95,35 @@
               >
                 🔴 Check-out
               </a>
+            </li>
+
+            <!-- Dropdown Menu -->
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                data-bs-toggle="collapse"
+                href="#reportsMenu"
+                role="button"
+                aria-expanded="false"
+              >
+                📊 Dashboard ▾
+              </a>
+              <div class="collapse" id="reportsMenu">
+                <ul
+                  class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3"
+                >
+                  <li>
+                    <a
+                      href="#"
+                      class="nav-link"
+                      hx-get="{% url 'dashboard-employee' %}"
+                      hx-target="#content"
+                      hx-swap="innerHTML"
+                      >Ijin Keluar / Masuk</a
+                    >
+                  </li>                 
+                </ul>
+              </div>
             </li>
 
             <!-- Dropdown Menu -->
@@ -135,7 +170,7 @@
                       hx-swap="innerHTML"
                       >Department</a
                     >
-                  </li>                   
+                  </li>
                 </ul>
               </div>
             </li>

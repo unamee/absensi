@@ -1,0 +1,15 @@
+<div class="row">
+  {% for log in logs %}
+    <div class="col-3">
+      <div class="card text-center">
+        <img src="{{ log.employee.photo.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+        <div class="card-body">
+          <h5 class="card-title">{{ log.employee.name }}</h5>
+          <p class="text-muted">Keluar: {{ log.out_time|date:"H:i" }}</p>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p>Tidak ada karyawan di luar kantor saat ini.</p>
+  {% endfor %}
+</div>

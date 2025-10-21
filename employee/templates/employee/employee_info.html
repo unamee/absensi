@@ -1,0 +1,97 @@
+{% load static %} {% if employee.employee.qr_code %}
+<div id="qr-section" class="text-center mb-3">
+  <h5>QR Code Karyawan</h5>
+  <img
+    src="{{ employee.employee.qr_code.url }}"
+    alt="QR Code"
+    class="img-fluid"
+    style="max-width: 200px"
+  />
+  <div class="mt-2">
+    <a
+      href="{{ employee.employee.qr_code.url }}"
+      class="btn btn-outline-primary"
+      download
+    >
+      Download QR Code
+    </a>
+    <button class="btn btn-outline-success" onclick="printQR()">
+      Print Label Kartu
+    </button>
+  </div>
+</div>
+{% endif %}
+<img src="{{ employee.employee.photo.url }}" alt="Foto" class="img-thumbnail" width="200">
+<p>Nama: {{ employee.first_name }} {{ employee.last_name }}</p>
+<p>ID Karyawan: {{ employee.employee.id_karyawan }}</p>
+
+<script>
+  function printQR() {
+    const qrSection = `
+    <div class="card-label">
+      <img src="{% static 'employee/img/logo_wsk.png' %}" alt="Logo" style="max-width:80px; margin-bottom:10px;">
+      <h3>PT WinnerSumbiri Knitting Manufacturing</h3>
+      <img src="{{ employee.employee.qr_code.url }}" alt="QR Code" />
+      <p><strong>Nama:</strong> {{ employee.first_name }} {{ employee.last_name }}</p>
+      <p><strong>ID:</strong> {{ employee.employee.id_karyawan }}</p>
+    </div>
+  `;
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Label Karyawan</title>
+        <style>
+          @page {
+            size: 80mm 105mm;
+            margin: 0;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 10mm;
+          }
+          .card-label {
+            border: 2px solid #000;
+            border-radius: 10px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+          }
+          img {
+            max-width: 60%;
+            margin: 10px 0;
+          }
+          h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+          }
+          p {
+            margin: 3px 0;
+            font-size: 14px;
+          }
+          @media print {
+            button { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        ${qrSection}
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = window.close;
+          }
+        <\/script>
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+  }
+</script>
