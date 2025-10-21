@@ -11,8 +11,8 @@ urlpatterns = [
     path('jabatan/delete-employee/<int:emp_id>/', views.delete_employee, name='delete-employee'),
 
     path("dashboard/", views.dashboard, name="dashboard-employee"),
+    path('dashboard/break-scan/', views.break_scan, name='break_scan'),
     path("dashboard/out-list/", views.out_list, name="out_list"),
-    path("dashboard/qr-scan/", views.qr_scan, name="qr_scan"),
 ]
 
 if settings.DEBUG:

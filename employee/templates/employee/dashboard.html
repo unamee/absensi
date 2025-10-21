@@ -1,8 +1,3 @@
-<!-- Buka QR -->
-<a href="{% url 'qr_scan' %}" class="btn btn-success mb-3" hx-get="{% url 'qr_scan' %}" hx-target="#content" hx-swap="innerHTML">
-  📷 Buka QR Scanner
-</a>
-
 <!-- dashboard.html -->
 <div id="out-list" hx-get="{% url 'out_list' %}" hx-trigger="every 5s" hx-swap="outerHTML">
     {% include 'employee/partials/out_list.html' %}

@@ -1,5 +1,5 @@
 import os
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
 from .models import Employee, BreakLog
@@ -18,34 +18,42 @@ def dashboard(request):
 
 
 @login_required_nocache
-def out_list(request):
-    logs = BreakLog.objects.filter(in_time__isnull=True)
-    return render(request, "employee/partials/out_list.html", {"logs": logs})
+def break_scan(request):
+    print("📡 Request received:", request.method)
+    message = None
 
-@csrf_exempt  # Karena HTMX post langsung tanpa form CSRF token
+    if request.method == "POST":
+        qr_code = request.POST.get("qr_code", "").strip()
+        print("🔹 Scanned:", qr_code)
+
+        try:
+            emp = Employee.objects.get(id_karyawan=qr_code)
+        except Employee.DoesNotExist:
+            message = f"❌ ID {qr_code} tidak ditemukan"
+            return render(request, "employee/partials/break_message.html", {"message": message})
+
+        # Cek apakah sedang out (belum in)
+        existing = BreakLog.objects.filter(employee=emp, in_time__isnull=True).first()
+        if existing:
+            existing.in_time = timezone.now()
+            existing.save()
+            message = f"✅ {emp.user.first_name} sudah kembali (In)"
+        else:
+            BreakLog.objects.create(employee=emp)
+            message = f"☕ {emp.user.first_name} keluar istirahat (Out)"
+
+        # Kembalikan hanya pesan (bukan seluruh halaman)
+        return render(request, "employee/partials/break_message.html", {"message": message})
+
+    # Jika GET request (pertama kali buka)
+    return render(request, "employee/break_scan.html")
+
+
+
 @login_required_nocache
-def qr_scan(request):
-    qr_data = request.POST.get("qr_data", "").strip()
-
-    try:
-        employee = Employee.objects.get(id_karyawan=qr_data)
-    except Employee.DoesNotExist:
-        return JsonResponse({"error": "❌ QR Code tidak dikenali."}, status=400)
-
-    # Cek apakah karyawan sedang keluar
-    active_log = BreakLog.objects.filter(employee=employee, in_time__isnull=True).first()
-
-    if active_log:
-        # berarti dia masuk kembali
-        active_log.in_time = timezone.now()
-        active_log.save()
-        message = f"✅ {employee.user.get_full_name()} telah kembali ke kantor!"
-    else:
-        # buat log baru (keluar)
-        BreakLog.objects.create(employee=employee, out_time=timezone.now())
-        message = f"🚶 {employee.user.get_full_name()} keluar kantor."
-
-    return HttpResponse(f"<div class='alert alert-success text-center'>{message}</div>")
+def out_list(request):
+    logs = BreakLog.objects.filter(in_time__isnull=True).select_related("employee")
+    return render(request, "employee/partials/out_list.html", {"logs": logs})
 
 
 @login_required_nocache

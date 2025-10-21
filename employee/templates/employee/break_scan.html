@@ -1,0 +1,55 @@
+<h3>Scan QR Karyawan</h3>
+
+<form
+  hx-post="{% url 'break_scan' %}"
+  hx-target="#message"
+  hx-swap="innerHTML"
+  hx-trigger="submit"
+  hx-indicator="#loading"
+>
+  {% csrf_token %}
+  <input
+  type="text"
+  name="qr_code"
+  id="qr_input"
+  autofocus
+  autocomplete="off"
+  class="form-control form-control-lg text-center"
+  placeholder="Scan di sini"
+  style="
+    font-size: 28px;
+    height: 70px;
+    text-align: center;
+    letter-spacing: 2px;
+  "
+/>
+
+  <button type="submit" hidden></button>
+</form>
+
+<div id="loading" class="htmx-indicator text-muted mt-2">⏳ Memproses...</div>
+
+<div id="message"></div>
+
+<script>
+  const qrInput = document.getElementById("qr_input");
+
+  // Fokus otomatis saat halaman dibuka
+  window.onload = () => qrInput.focus();
+
+  // Fokus ulang setiap kali HTMX selesai memuat respons
+  document.body.addEventListener("htmx:afterSwap", (event) => {
+    if (event.target.id === "message") {
+      qrInput.value = ""; // kosongkan input
+      qrInput.focus();    // kembalikan fokus
+    }
+  });
+
+  // Tangani Enter (agar tetap via HTMX)
+  qrInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      this.form.requestSubmit(); // kirim via HTMX
+    }
+  });
+</script>
