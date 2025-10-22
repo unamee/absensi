@@ -70,6 +70,24 @@
                 />
               </div>
               <div class="mb-3">
+                <label for="dept" class="form-label">Department</label>
+                <select name="dept" id="dept" class="form-select">
+                  <option value="">-- Pilih Department --</option>
+                  {% for d in depts %}
+                  <option value="{{ d.id_dept }}">{{ d.nama_dept }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="jabatan" class="form-label">Jabatan</label>
+                <select name="jabatan" id="jabatan" class="form-select">
+                  <option value="">-- Pilih Jabatan --</option>
+                  {% for d in jabatan %}
+                  <option value="{{ d.id_jabatan }}">{{ d.nama_jabatan }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
                 <label for="emailInput" class="form-label">Email address</label>
                 <input
                   type="email"
@@ -80,14 +98,16 @@
                   required
                 />
               </div>
-              {% comment %} <div class="mb-3">
+              {% comment %}
+              <div class="mb-3">
                 <label for="messageTextarea" class="form-label">Message</label>
                 <textarea
                   class="form-control"
                   id="messageTextarea"
                   rows="3"
                 ></textarea>
-              </div> {% endcomment %}
+              </div>
+              {% endcomment %}
               <a
                 href="#"
                 hx-get="{% url 'employee' %}"

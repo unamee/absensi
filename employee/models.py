@@ -1,10 +1,13 @@
 from django.db import models
+from PIL import Image
 from django.contrib.auth.models import User
 import qrcode, os
 from io import BytesIO
 from django.core.files import File
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from dept.models import Dept
+from jabatan.models import Jabatan
 
 
 class Employee(models.Model):
@@ -16,6 +19,8 @@ class Employee(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     id_karyawan = models.CharField(max_length=10, unique=True)
+    dept = models.ForeignKey(Dept, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
+    jabatan = models.ForeignKey(Jabatan, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
     qr_code = models.ImageField(upload_to="qrcodes/", blank=True, null=True)
     photo = models.ImageField(
         upload_to="employees/",
@@ -37,10 +42,9 @@ class Employee(models.Model):
 
     def save(self, *args, **kwargs):
         if self.id_karyawan and not self.qr_code:
-            import qrcode
-            from io import BytesIO
-            from django.core.files import File
-
+            #import qrcode
+            #from io import BytesIO
+            #from django.core.files import File
             qr = qrcode.make(self.id_karyawan)
             canvas = BytesIO()
             qr.save(canvas, format="PNG")

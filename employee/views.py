@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
 from .models import Employee, BreakLog
+from dept.models import Dept
+from jabatan.models import Jabatan
 from accounts.utils import login_required_nocache
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
@@ -64,6 +66,8 @@ def create_employee(request):
         id_karyawan = request.POST.get("id_karyawan", "").strip()
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
+        dept_id = request.POST.get("dept", "").strip()
+        jabatan_id = request.POST.get("jabatan", "").strip()
         email = request.POST.get("email", "").strip()
 
         # Cek jika username sudah ada
@@ -80,10 +84,16 @@ def create_employee(request):
                 email=email,
             )
             # 2️⃣ Baru buat employee terkait
-            employee = Employee.objects.create(user=user, id_karyawan=id_karyawan)
+            Employee.objects.create(user=user, id_karyawan=id_karyawan, dept_id = dept_id, jabatan_id = jabatan_id)
             messages.success(request, f"Employee {user.username} berhasil dibuat!")
             return redirect("employee")
-    return render(request, "employee/employee_form.html")
+    depts = Dept.objects.all()
+    jabatan = Jabatan.objects.all()
+    context = {
+        'depts' : depts,
+        'jabatan' : jabatan,
+    }
+    return render(request, "employee/employee_form.html", context)
 
 
 @login_required_nocache
@@ -101,16 +111,23 @@ def employee_update(request, emp_id):
         id_karyawan = request.POST.get("id_karyawan", "").strip()
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
+        dept_instance = Dept.objects.get(pk=request.POST.get("dept", "").strip()) # get instance dept
+        jabatan_instance = Jabatan.objects.get(pk=request.POST.get("jabatan", "").strip()) # get instance jabatan
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "").strip()
-        photo = request.FILES.get("photo")
+        photo = request.FILES.get("photo")        
 
-        if id_karyawan != employee.id_karyawan:
+        print (dept_instance)
+        print (jabatan_instance)
+
+        if id_karyawan != employee.id_karyawan: #jika kode karyawan berubah
             if employee.qr_code and os.path.isfile(employee.qr_code.path):
                 os.remove(employee.qr_code.path)
 
-            employee.id_karyawan = id_karyawan
+            employee.id_karyawan = id_karyawan            
             generate_qr_code(employee)
+        employee.dept = dept_instance
+        employee.jabatan = jabatan_instance    
 
         user.first_name = first_name
         user.last_name = last_name
@@ -129,8 +146,14 @@ def employee_update(request, emp_id):
             request, "✅ Employee updated successfully with resized photo!"
         )
         return redirect("employee")
-
-    return render(request, "employee/partials/employee_update.html", {"employee": user})
+    depts = Dept.objects.all()
+    jabatan = Jabatan.objects.all()
+    context = {
+        'employee' : user,
+        'depts' : depts,
+        'jabatan' : jabatan,
+    }
+    return render(request, "employee/partials/employee_update.html", context)
 
 
 # Delete Jabatan
