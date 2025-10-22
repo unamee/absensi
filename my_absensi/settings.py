@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-dn=g$o8ojaiewlz!)fl2wplwp&fy*y!r!9&)4rl4!n9u5xki1l
 DEBUG = True
 
 #ALLOWED_HOSTS = ["*"]
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.20.128', 'ijin.winnersumbiri.local']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.20.128', 'absensi.winnersumbiri.local', 'absensi.winnersumbiri.com']
 
 MESSAGE_TAGS = {
     messages.DEBUG: "alert-secondary",
