@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     "employee",
     "jabatan",
     "dept",
+    "attendance",
+    "machine",
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,81 @@
+<tr id="row-{{ m.id }}">
+  <td>{{ m.name }}</td>
+  <td>{{ m.ip_address }}</td>
+  <td>
+    {% if m.status == 'Y' %}
+    <span class="badge bg-success">Connected</span>
+    {% else %}
+    <span class="badge bg-secondary">Not Connected</span>
+    {% endif %}
+  </td>
+  <td>
+    {% if m.status == 'Y' %}
+    <!-- Jika connected -->
+    <a
+      href="#"
+      hx-post="{% url 'machine_toggle_connect' m.id %}"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-target="#row-{{ m.id }}"
+      hx-swap="outerHTML"
+      class="btn btn-sm btn-danger"
+    >
+      Disconnect
+    </a>
+
+    {% if m.status == 'Y' %}
+    <a
+      href="#"
+      hx-get="{% url 'machine_pull_day_modal' m.id %}"
+      hx-target="#modal-body"
+      hx-swap="innerHTML"
+      data-bs-toggle="modal"
+      data-bs-target="#confirmModal"
+      class="btn btn-sm btn-info"
+    >
+      🕒 Tarik Data Harian
+    </a>
+    {% endif %}
+
+
+    <!-- Tombol edit & delete disabled -->
+    <button class="btn btn-sm btn-warning" disabled>Edit</button>
+    <button class="btn btn-sm btn-danger" disabled>Delete</button>
+
+    {% else %}
+    <!-- Jika not connected -->
+    <a
+      href="#"
+      hx-post="{% url 'machine_toggle_connect' m.id %}"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-target="#row-{{ m.id }}"
+      hx-swap="outerHTML"
+      class="btn btn-sm btn-success"
+    >
+      Connect
+    </a>
+
+    
+    <a
+      href="#"
+      hx-get="{% url 'machine_edit' m.id %}"
+      hx-target="#content"
+      hx-swap="innerHTML"
+      class="btn btn-sm btn-warning"
+    >
+      Edit
+    </a>
+
+    <a
+      href="#"
+      hx-get="{% url 'machine_confirm_delete' m.id %}"
+      hx-target="#modal-body"
+      hx-swap="innerHTML"
+      data-bs-toggle="modal"
+      data-bs-target="#confirmModal"
+      class="btn btn-sm btn-danger"
+    >
+      Delete
+    </a>
+    {% endif %}
+  </td>
+</tr>

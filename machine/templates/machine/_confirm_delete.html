@@ -1,0 +1,19 @@
+<p>
+  Apakah Anda yakin ingin menghapus mesin
+  <strong>{{ machine.name }}</strong> ({{ machine.ip_address }})?
+</p>
+<div class="d-flex justify-content-end gap-2 mt-4">
+  <form
+    method="post"
+    hx-post="{% url 'machine_delete' machine.id %}"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    hx-target="#row-{{ machine.id }}"
+    hx-swap="outerHTML"
+  >
+    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+  </form>
+
+  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+    Batal
+  </button>
+</div>

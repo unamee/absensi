@@ -1,0 +1,197 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.contrib import messages
+from datetime import datetime, timedelta
+from django.utils import timezone
+from attendance.models import Machine, Connect, Attendance
+from employee.models import Employee
+from .forms import MachineForm
+from zk import ZK  # library pyzk untuk koneksi mesin
+
+
+def machine_list(request):
+    machines = Machine.objects.all()
+    return render(request, "machine/machine_list.html", {"machines": machines})
+
+
+def machine_create(request):
+    if request.method == "POST":
+        form = MachineForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Mesin berhasil ditambahkan.")
+            return redirect("machine_list")
+    else:
+        form = MachineForm()
+    return render(request, "machine/machine_form.html", {"form": form})
+
+
+def machine_edit(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    if request.method == "POST":
+        form = MachineForm(request.POST, instance=machine)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Data mesin diperbarui.")
+            machines = Machine.objects.all()
+            return render(request, "machine/machine_list.html", {"machines": machines})
+    else:
+        form = MachineForm(instance=machine)
+    return render(request, "machine/machine_form.html", {"form": form})
+
+
+def machine_confirm_delete(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    html = render_to_string("machine/_confirm_delete.html", {"machine": machine})
+    return HttpResponse(html)
+
+
+def machine_delete(request, pk):
+    if request.method == "POST":
+        machine = get_object_or_404(Machine, pk=pk)
+        machine.delete()
+        return HttpResponse("")  # baris dihapus tanpa reload
+    return HttpResponse(status=405)
+
+
+def machine_connect(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    zk = ZK(machine.ip_address, port=4370, timeout=5)
+    try:
+        conn = zk.connect()
+        machine.status = Connect.Connected
+        machine.save()
+        conn.disconnect()
+        messages.success(
+            request, f"✅ Terhubung ke mesin {machine.name} ({machine.ip_address})"
+        )
+    except Exception as e:
+        machine.status = Connect.NotConnected
+        machine.save()
+        messages.error(request, f"❌ Gagal konek: {e}")
+    return redirect("machine_list")
+
+
+def machine_toggle_connect(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    zk = ZK(machine.ip_address, port=4370, timeout=5)
+
+    if machine.status == Connect.Connected:
+        machine.status = Connect.NotConnected
+        machine.save()
+        messages.info(request, f"🔌 Mesin {machine.name} telah diputuskan.")
+    else:
+        try:
+            conn = zk.connect()
+            machine.status = Connect.Connected
+            machine.save()
+            conn.disconnect()
+            messages.success(request, f"✅ Terhubung ke mesin {machine.name}")
+        except Exception as e:
+            machine.status = Connect.NotConnected
+            machine.save()
+            messages.error(request, f"❌ Gagal konek ke {machine.name}: {e}")
+
+    # Render ulang satu baris saja (update dinamis)
+    return render(request, "machine/_machine_row.html", {"m": machine})
+
+
+def machine_pull_day_modal(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    return render(request, "machine/_pull_day_modal.html", {"machine": machine})
+
+
+def machine_pull_day(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    zk = ZK(machine.ip_address, port=4370, timeout=5)
+    pulled, missing_users = 0, set()
+    filename = None
+    print("📥 masuk ke machine_pull_day")
+    if request.method == "POST":
+        print("📅 Tanggal diterima:", request.POST.get("date"))
+        try:
+            date_str = request.POST.get("date")
+            if not date_str:
+                messages.error(request, "❌ Harap pilih tanggal.")
+                return render(
+                    request,
+                    "machine/machine_list.html",
+                    {"machines": Machine.objects.all()},
+                )
+
+            selected_date = datetime.strptime(date_str, "%Y-%m-%d")
+            start = timezone.make_aware(
+                datetime.combine(selected_date, datetime.min.time())
+            )
+            end = start + timedelta(days=1)
+
+            conn = zk.connect()
+            print("🔌 Connected to:", machine.ip_address)
+            logs = conn.get_attendance()
+            print("📋 Total logs fetched:", len(logs))
+
+            for log in logs:
+                print("📜 Raw log timestamp:", log.timestamp, type(log.timestamp))
+                # pastikan semua timestamp jadi timezone aware
+                log_time = (
+                    timezone.make_aware(log.timestamp)
+                    if timezone.is_naive(log.timestamp)
+                    else log.timestamp
+                )
+
+                if log_time.date() == selected_date.date():
+                    print(
+                        f"🕒 Log ditemukan: user_id={log.user_id}, timestamp={log_time}"
+                    )
+                    employee = Employee.objects.filter(
+                        id_karyawan=str(log.user_id)
+                    ).first()
+
+                    Attendance.objects.get_or_create(
+                        machine=machine,
+                        user_id=str(log.user_id),
+                        timestamp=log_time,
+                        defaults={
+                            "verify_type": getattr(log, "status", ""),
+                            "status": getattr(log, "punch", ""),
+                            "employee": employee,
+                        },
+                    )
+                    pulled += 1
+                    if not employee:
+                        missing_users.add(str(log.user_id))
+
+            conn.disconnect()
+
+            if missing_users:
+                reports_dir = os.path.join(settings.MEDIA_ROOT, "reports")
+                os.makedirs(reports_dir, exist_ok=True)
+                filename = f"missing_users_{machine.name}_{date_str}.txt"
+                file_path = os.path.join(reports_dir, filename)
+                with open(file_path, "w") as f:
+                    f.write("Daftar user_id dari mesin yang tidak ditemukan:\n")
+                    for uid in sorted(missing_users):
+                        f.write(f"{uid}\n")
+
+            messages.success(
+                request,
+                f"✅ {pulled} data berhasil ditarik dari mesin {machine.name} ({date_str}).",
+            )
+            if missing_users:
+                messages.warning(
+                    request,
+                    f"⚠️ {len(missing_users)} user tidak ditemukan. Silakan download laporan.",
+                )
+
+        except Exception as e:
+            messages.error(request, f"❌ Gagal menarik data: {e}")
+
+    # Render ulang tabel mesin sebagai partial (bukan full HTML)
+    machines = Machine.objects.all()
+    html = render_to_string(
+        "machine/_machine_table.html",
+        {"machines": machines, "missing_file": filename},
+        request,
+    )
+    return HttpResponse(html)
