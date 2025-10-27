@@ -10,6 +10,30 @@
   <div id="content">{% include "machine/_machine_table.html" %}</div>
 </div>
 
+{% if messages %}
+<div
+  id="django-messages"
+  class="position-fixed top-0 end-0 p-3"
+  style="z-index: 9999"
+>
+  {% for message in messages %}
+  <div
+    class="alert {{ message.tags }} alert-dismissible fade show shadow"
+    role="alert"
+    style="min-width: 300px; transition: opacity 0.8s ease"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <!-- Modal Konfirmasi Delete -->
 <div
   class="modal fade"
@@ -36,25 +60,24 @@
   </div>
 </div>
 
-
 <script>
-document.body.addEventListener('htmx:afterSwap', function(evt) {
-  // Tutup modal setelah data ditarik
-  if (evt.detail.target.id === 'content') {
-    const modalEl = document.getElementById('pullDayModal');
-    if (modalEl) {
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
+  document.body.addEventListener("htmx:afterSwap", function (evt) {
+    // Tutup modal setelah data ditarik
+    if (evt.detail.target.id === "content") {
+      const modalEl = document.getElementById("pullDayModal");
+      if (modalEl) {
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+      }
     }
-  }
-});
+  });
 </script>
 
 <script>
-  document.body.addEventListener("htmx:beforeRequest", function() {
+  document.body.addEventListener("htmx:beforeRequest", function () {
     document.body.classList.add("cursor-wait");
   });
-  document.body.addEventListener("htmx:afterRequest", function() {
+  document.body.addEventListener("htmx:afterRequest", function () {
     document.body.classList.remove("cursor-wait");
   });
 </script>
@@ -62,3 +85,5 @@ document.body.addEventListener('htmx:afterSwap', function(evt) {
 <div id="htmx-loader" class="text-center mt-3" style="display: none">
   ⏳ <small>Memuat data dari mesin...</small>
 </div>
+
+

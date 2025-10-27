@@ -1,3 +1,5 @@
+
+
 <table class="table table-bordered">
   <thead>
     <tr>
@@ -8,21 +10,24 @@
     </tr>
   </thead>
   <tbody>
-    {% for m in machines %}
-      {% include "machine/_machine_row.html" %}
+    {% for m in machines %} {% include "machine/_machine_row.html" %} 
     {% empty %}
-      <tr>
-        <td colspan="4" class="text-center">Belum ada mesin</td>
-      </tr>
+    <tr>
+      <td colspan="4" class="text-center">Belum ada mesin</td>
+    </tr>
     {% endfor %}
   </tbody>
 </table>
 
 {% if missing_file %}
 <div class="alert alert-warning mt-3">
-  ⚠️ Beberapa user tidak ditemukan. 
-  <a href="{% url 'download_missing_file' missing_file %}" class="btn btn-sm btn-outline-primary ms-2">
+  ⚠️ Beberapa user tidak ditemukan.
+  <a
+    href="{% url 'download_missing_file' missing_file %}"
+    class="btn btn-sm btn-outline-primary ms-2"
+  >
     Download Laporan
   </a>
 </div>
 {% endif %}
+

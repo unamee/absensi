@@ -18,6 +18,7 @@
       hx-target="#row-{{ m.id }}"
       hx-swap="outerHTML"
       class="btn btn-sm btn-danger"
+      class="btn btn-sm {% if m.status == 'Y' %}btn-danger{% else %}btn-success{% endif %}"
     >
       Disconnect
     </a>
@@ -36,7 +37,6 @@
     </a>
     {% endif %}
 
-
     <!-- Tombol edit & delete disabled -->
     <button class="btn btn-sm btn-warning" disabled>Edit</button>
     <button class="btn btn-sm btn-danger" disabled>Delete</button>
@@ -54,7 +54,6 @@
       Connect
     </a>
 
-    
     <a
       href="#"
       hx-get="{% url 'machine_edit' m.id %}"
@@ -77,5 +76,20 @@
       Delete
     </a>
     {% endif %}
+
+    <!-- tarik user dari mesin ke db -->
+    {% if m.status == 'Y' %}
+    <a
+      href="#"
+      hx-post="{% url 'machine_sync_users' m.id %}"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-target="#content"
+      hx-swap="innerHTML"
+      class="btn btn-sm btn-info"
+    >
+      🔄 Sync Users
+    </a>
+    {% endif %}
+    <!-- end tarik -->
   </td>
 </tr>

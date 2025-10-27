@@ -27,4 +27,5 @@ urlpatterns = [
     path("<int:pk>/pull-day-modal/", views.machine_pull_day_modal, name="machine_pull_day_modal"),
     path("<int:pk>/pull-day/", views.machine_pull_day, name="machine_pull_day"),
     path("missing/<str:filename>/", download_missing_file, name="download_missing_file"),
+    path("<int:pk>/sync-users/", views.machine_sync_users, name="machine_sync_users"),
 ]
