@@ -199,6 +199,28 @@
                       >Machine</a
                     >
                   </li>
+                  <li>
+                    <a
+                      href="#"
+                      class="nav-link"
+                      hx-get="{% url 'shift_list' %}"
+                      hx-target="#content"
+                      hx-swap="innerHTML"
+                      >Shift</a
+                    >
+                  </li>
+                 
+                  <li>
+                    <a
+                      href="#"
+                      class="nav-link"
+                      hx-get="{% url 'attendance_list' %}"
+                      hx-target="#content"
+                      hx-swap="innerHTML"
+                    >
+                      Attendance
+                    </a>
+                  </li>
                 </ul>
               </div>
             </li>
@@ -260,7 +282,9 @@
             ☰ Toggle Menu
           </button>
 
-          <h2>Dashboard</h2>
+          {% comment %}
+          <h2>PT. WinnerSumbiri Knitting</h2>
+          {% endcomment %}
           <div id="content" class="mt-4">
             <div class="alert alert-info">
               Welcome, {{ request.user.username }}!
@@ -324,8 +348,6 @@
         document.body.classList.remove("modal-open"); // agar scroll aktif lagi
       });
     </script>
-
-    
   </body>
 </html>
 

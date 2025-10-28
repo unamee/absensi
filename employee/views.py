@@ -64,6 +64,7 @@ def create_employee(request):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "").strip()
         id_karyawan = request.POST.get("id_karyawan", "").strip()
+        id_pin = request.POST.get("id_pin", "").strip()
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
         dept_id = request.POST.get("dept", "").strip()
@@ -84,7 +85,7 @@ def create_employee(request):
                 email=email,
             )
             # 2️⃣ Baru buat employee terkait
-            Employee.objects.create(user=user, id_karyawan=id_karyawan, dept_id = dept_id, jabatan_id = jabatan_id)
+            Employee.objects.create(user = user, id_karyawan = id_karyawan, id_pin = id_pin, dept_id = dept_id, jabatan_id = jabatan_id)
             messages.success(request, f"Employee {user.username} berhasil dibuat!")
             return redirect("employee")
     depts = Dept.objects.all()
@@ -109,51 +110,62 @@ def employee_update(request, emp_id):
 
     if request.method == "POST":
         id_karyawan = request.POST.get("id_karyawan", "").strip()
+        id_pin = request.POST.get("id_pin", "").strip()
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
-        dept_instance = Dept.objects.get(pk=request.POST.get("dept", "").strip()) # get instance dept
-        jabatan_instance = Jabatan.objects.get(pk=request.POST.get("jabatan", "").strip()) # get instance jabatan
+        dept_instance = Dept.objects.get(pk=request.POST.get("dept", "").strip())
+        jabatan_instance = Jabatan.objects.get(pk=request.POST.get("jabatan", "").strip())
         email = request.POST.get("email", "").strip()
+        username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "").strip()
-        photo = request.FILES.get("photo")        
+        photo = request.FILES.get("photo")
 
-        print (dept_instance)
-        print (jabatan_instance)
-
-        if id_karyawan != employee.id_karyawan: #jika kode karyawan berubah
+        # Cek perubahan ID karyawan → regen QR
+        if id_karyawan != employee.id_karyawan:
             if employee.qr_code and os.path.isfile(employee.qr_code.path):
                 os.remove(employee.qr_code.path)
-
-            employee.id_karyawan = id_karyawan            
+            employee.id_karyawan = id_karyawan
             generate_qr_code(employee)
+
+        employee.id_pin = id_pin
         employee.dept = dept_instance
-        employee.jabatan = jabatan_instance    
+        employee.jabatan = jabatan_instance
 
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
 
+        # ✅ Validasi username unik
+        if username != user.username:
+            if User.objects.filter(username=username).exclude(pk=user.pk).exists():
+                messages.error(request, f"❌ Username '{username}' sudah digunakan oleh user lain.")
+                return redirect("employee_edit", emp_id=employee.id)
+            user.username = username
+
+        # ✅ Ganti password jika diisi
         if password:
             user.set_password(password)
 
         user.save()
 
+        # ✅ Update foto jika diunggah
         if photo:
             employee.photo = photo
 
         employee.save()
-        messages.success(
-            request, "✅ Employee updated successfully with resized photo!"
-        )
+
+        messages.success(request, f"✅ Data karyawan '{user.username}' berhasil diperbarui.")
         return redirect("employee")
+
     depts = Dept.objects.all()
     jabatan = Jabatan.objects.all()
     context = {
-        'employee' : user,
-        'depts' : depts,
-        'jabatan' : jabatan,
+        'employee': user,
+        'depts': depts,
+        'jabatan': jabatan,
     }
     return render(request, "employee/partials/employee_update.html", context)
+
 
 
 # Delete Jabatan

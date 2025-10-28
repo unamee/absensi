@@ -1,0 +1,121 @@
+{% comment %} <div class="container mt-4">
+  <h4>📋 Data Absensi (100 Log Terakhir)</h4>
+
+  <form
+    hx-get="{% url 'attendance_list' %}?partial=1"
+    hx-target="#attendance-table"
+    hx-swap="outerHTML"
+    class="mb-3 d-flex justify-content-end"
+  >
+    <input
+      type="date"
+      name="date"
+      value="{{ date|date:'Y-m-d' }}"
+      class="form-control me-2"
+      style="max-width: 200px"
+    />
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a
+      href="#"
+      hx-get="{% url 'attendance_list' %}?partial=1"
+      hx-target="#attendance-table"
+      hx-swap="outerHTML"
+      class="btn btn-secondary ms-2"
+    >Reset</a>
+  </form>
+
+  <div id="attendance-table">
+    {% include "attendance/_attendance_table.html" %}
+  </div>
+</div>
+
+<!-- DataTables scripts -->
+<link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"
+/>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  // fungsi untuk inisialisasi DataTables
+  function initDataTable() {
+    if ($.fn.DataTable.isDataTable("#attendanceDataTable")) {
+      $("#attendanceDataTable").DataTable().destroy();
+    }
+    $("#attendanceDataTable").DataTable({
+      pageLength: 10,
+      order: [[6, "desc"]],
+      language: {
+        lengthMenu: "Tampilkan _MENU_ data per halaman",
+        zeroRecords: "Tidak ditemukan data",
+        info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+        infoEmpty: "Tidak ada data",
+        search: "Cari:",
+      },
+    });
+  }
+
+  // jalankan DataTables pertama kali
+  $(document).ready(function () {
+    initDataTable();
+  });
+
+  // reinit setiap HTMX swap
+  document.body.addEventListener("htmx:afterSwap", function (evt) {
+    if (evt.detail.target.id === "attendance-table") {
+      initDataTable();
+    }
+  });
+</script> {% endcomment %}
+
+
+<div class="container mt-4">
+  <h4>📋 Data Absensi {% if date_range %} ({{ date_range.0 }} → {{ date_range.1 }}) {% endif %}</h4>
+
+  <form
+    hx-get="{% url 'attendance_list' %}?partial=1"
+    hx-target="#attendance-table"
+    hx-swap="outerHTML"
+    class="mb-3 d-flex justify-content-end align-items-center flex-wrap gap-2"
+  >
+    <input
+      type="date"
+      name="from_date"
+      value="{{ from_date }}"
+      class="form-control"
+      style="max-width: 200px"
+      required
+    />
+    <span class="mx-1">s.d</span>
+    <input
+      type="date"
+      name="to_date"
+      value="{{ to_date }}"
+      class="form-control"
+      style="max-width: 200px"
+      required
+    />
+
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a
+      href="#"
+      hx-get="{% url 'attendance_list' %}?partial=1"
+      hx-target="#attendance-table"
+      hx-swap="outerHTML"
+      class="btn btn-secondary"
+      >Reset</a>
+      <a
+      href="{% url 'attendance_export_excel' %}?start_date={{ date_start|date:'Y-m-d' }}&end_date={{ date_end|date:'Y-m-d' }}"
+      class="btn btn-success"
+    >
+      <i class="fa fa-file-excel"></i> Export Excel
+    </a>
+  </form>
+
+  <div id="attendance-table">
+    {% include "attendance/_attendance_table.html" %}
+  </div>
+</div>
+

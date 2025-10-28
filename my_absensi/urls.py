@@ -10,4 +10,6 @@ urlpatterns = [
     path("", include("jabatan.urls")),
     path("", include("dept.urls")),
     path("", include("machine.urls")),
+    path("", include("shift.urls")),
+    path("", include("attendance.urls")),
 ]

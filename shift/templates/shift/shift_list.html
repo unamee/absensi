@@ -1,0 +1,131 @@
+<!-- message -->
+<div class="card-body">
+  {% if messages %}
+  <div id="django-messages" class="mb-3">
+    {% for message in messages %}
+    <div
+      class="alert {{ message.tags }} alert-dismissible fade show shadow-sm"
+      role="alert"
+      style="transition: opacity 0.8s ease"
+    >
+      {{ message }}
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <script>
+    // Auto-hide alert setelah 5 detik
+    document.addEventListener("DOMContentLoaded", function () {
+      const alerts = document.querySelectorAll("#django-messages .alert");
+      alerts.forEach((alert) => {
+        setTimeout(() => {
+          alert.style.opacity = "0";
+          setTimeout(() => alert.remove(), 800);
+        }, 5000);
+      });
+    });
+  </script>
+
+  <div id="content">
+    <div class="container mt-4">
+      <h3>Daftar Shift</h3>
+      <a
+        hx-get="{% url 'shift_create' %}"
+        hx-target="#content"
+        hx-swap="innerHTML"
+        class="btn btn-primary mb-3"
+        >+ Tambah Shift</a
+      >
+
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Jam Masuk</th>
+            <th>Jam Pulang</th>
+            <th>Toleransi Masuk</th>
+            <th>Toleransi Pulang</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for shift in shifts %} {% include "shift/_shift_row.html" %} {% empty %}
+          <tr>
+            <td colspan="6" class="text-center">Belum ada shift</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Delete -->
+  <div
+    class="modal fade"
+    id="confirmDeleteModal"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Konfirmasi Hapus</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p id="deleteMessage">Apakah Anda yakin ingin menghapus shift ini?</p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Batal
+          </button>
+          <button id="confirmDeleteBtn" class="btn btn-danger">Hapus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function confirmDelete(deleteUrl, shiftName) {
+      // tampilkan nama shift di modal
+      document.getElementById(
+        "deleteMessage"
+      ).innerText = `Apakah Anda yakin ingin menghapus shift "${shiftName}"?`;
+
+      const modalEl = document.getElementById("confirmDeleteModal");
+      const modal = new bootstrap.Modal(modalEl);
+      const confirmBtn = document.getElementById("confirmDeleteBtn");
+
+      // bersihkan event lama agar tidak dobel
+      confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+      const newConfirmBtn = document.getElementById("confirmDeleteBtn");
+
+      // ketika klik hapus, kirim request htmx
+      newConfirmBtn.addEventListener("click", function () {
+        htmx.ajax("DELETE", deleteUrl, {
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          target: "#content",
+          swap: "innerHTML",
+        });
+        modal.hide();
+      });
+
+      modal.show();
+    }
+  </script>
+</div>

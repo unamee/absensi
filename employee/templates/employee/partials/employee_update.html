@@ -24,7 +24,6 @@
                   placeholder="Enter your Username"
                   name="username"
                   value="{{ employee.username }}"
-                  disabled
                 />
               </div>
               <div class="mb-3">
@@ -46,6 +45,17 @@
                   placeholder="Enter your ID Karyawan"
                   name="id_karyawan"
                   value="{{ employee.employee.id_karyawan }}"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">ID PIN</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="id_pin"
+                  placeholder="Enter your ID PIN"
+                  name="id_pin"
+                  value="{{ employee.employee.id_pin }}"
                 />
               </div>
               <div class="mb-3">

@@ -1,0 +1,40 @@
+<div class="container mt-4">
+  <h4>Laporan Absensi Harian - {{ date }}</h4>
+  <form method="get" class="mb-3">
+    <div class="input-group" style="max-width: 300px;">
+      <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" class="form-control">
+      <button type="submit" class="btn btn-primary">Tampilkan</button>
+    </div>
+  </form>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>ID Karyawan</th>
+        <th>Nama</th>
+        <th>Dept</th>
+        <th>Jabatan</th>
+        <th>Jam Masuk</th>
+        <th>Jam Pulang</th>
+        <th>Total Jam</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in report %}
+      <tr>
+        <td>{{ r.id_karyawan }}</td>
+        <td>{{ r.nama }}</td>
+        <td>{{ r.dept }}</td>
+        <td>{{ r.jabatan }}</td>
+        <td>{{ r.masuk }}</td>
+        <td>{{ r.pulang }}</td>
+        <td>{{ r.durasi }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center">Tidak ada data absensi</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

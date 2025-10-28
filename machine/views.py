@@ -146,7 +146,7 @@ def machine_pull_day(request, pk):
                         f"🕒 Log ditemukan: user_id={log.user_id}, timestamp={log_time}"
                     )
                     employee = Employee.objects.filter(
-                        id_karyawan=str(log.user_id)
+                        id_pin=str(log.user_id)
                     ).first()
 
                     Attendance.objects.get_or_create(
@@ -199,6 +199,7 @@ def machine_pull_day(request, pk):
 
 def machine_sync_users(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
+    #employee = Employee.objects.filter(id_pin=str(log.user_id)).first()
 
     # ✅ Pastikan mesin terkoneksi
     if machine.status != 'Y':
@@ -217,7 +218,7 @@ def machine_sync_users(request, pk):
             name = u.name.strip() if u.name else f"User_{user_id}"
 
             # ❌ Skip jika user_id sudah ada di Employee
-            if Employee.objects.filter(id_karyawan=user_id).exists():
+            if Employee.objects.filter(id_pin=user_id).exists():
                 skipped += 1
                 continue
 
@@ -233,7 +234,7 @@ def machine_sync_users(request, pk):
             # ✅ Simpan ke Employee
             emp = Employee(
                 user=django_user,
-                id_karyawan=user_id,
+                id_pin=user_id,
             )
             emp.save()
             imported += 1

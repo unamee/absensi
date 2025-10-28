@@ -19,6 +19,7 @@ class Employee(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     id_karyawan = models.CharField(max_length=10, unique=True)
+    id_pin = models.CharField(max_length=10, unique=True, null=True, blank=True)
     dept = models.ForeignKey(Dept, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
     jabatan = models.ForeignKey(Jabatan, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
     qr_code = models.ImageField(upload_to="qrcodes/", blank=True, null=True)

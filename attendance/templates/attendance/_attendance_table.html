@@ -1,0 +1,117 @@
+{% comment %}
+<table
+  id="attendanceDataTable"
+  class="table table-bordered table-striped table-hover align-middle"
+>
+  <thead class="table-dark text-center">
+    <tr>
+      <th>#</th>
+      <th>ID Karyawan</th>
+      <th>Nama</th>
+      <th>Departemen</th>
+      <th>Jabatan</th>
+      <th>Mesin</th>
+      <th>Waktu Absen</th>
+      <th>Verify Type</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in report %}
+    <tr>
+      <td class="text-center">{{ forloop.counter }}</td>
+      <td>{{ r.user_id }}</td>
+      <td>
+        {% if r.employee %} {{ r.employee.user.first_name }} {{
+        r.employee.user.last_name }} {% else %}
+        <span class="text-muted">Tidak Dikenal</span>
+        {% endif %}
+      </td>
+      <td>{{ r.employee.dept.nama|default:"-" }}</td>
+      <td>{{ r.employee.jabatan.nama|default:"-" }}</td>
+      <td>{{ r.machine.name }}</td>
+      <td>{{ r.timestamp|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ r.verify_type|default:"-" }}</td>
+      <td>{{ r.status|default:"-" }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9" class="text-center text-muted">
+        Tidak ada data absensi.
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endcomment %}
+
+<table
+  id="attendanceTable"
+  class="table table-bordered table-striped table-hover align-middle"
+>
+  <thead class="table-dark text-center">
+    <tr>
+      <th>#</th>
+      <th>ID Karyawan</th>
+      <th>Nama</th>
+      <th>Departemen</th>
+      <th>Jabatan</th>
+      <th>Mesin</th>
+      <th>Waktu Absen</th>
+      <th>Verify Type</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in report %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ r.user_id }}</td>
+      <td>
+        {% if r.employee %} {{ r.employee.user.first_name }} 
+        {{ r.employee.user.last_name }} {% else %}
+        <span class="text-muted">Tidak Dikenal</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if r.employee and r.employee.dept %} {{ r.employee.dept.nama_dept }}
+        {% else %}
+        <span class="text-muted">-</span>
+        {% endif %}
+      </td>
+
+      <td>
+        {% if r.employee and r.employee.jabatan %} 
+        {{ r.employee.jabatan.nama_jabatan }} {% else %}
+        <span class="text-muted">-</span>
+        {% endif %}
+      </td>
+      <td>{{ r.machine.name }}</td>
+      <td>{{ r.timestamp|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ r.verify_type|default:"-" }}</td>
+      <td>{{ r.status|default:"-" }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9" class="text-center text-muted">
+        Tidak ada data absensi.
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const table = $("#attendanceTable").DataTable({
+      pageLength: 25,
+      order: [[6, "desc"]],
+      language: {
+        search: "Cari:",
+        lengthMenu: "Tampilkan _MENU_ baris",
+        info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+      },
+      destroy: true, // penting agar HTMX bisa reload tanpa error
+    });
+  });
+</script>

@@ -31,7 +31,7 @@ class Machine(models.Model):
 class Attendance(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
-    user_id = models.CharField(max_length=20, default="")  # ID dari mesin
+    user_id = models.CharField(max_length=20, default="")  # ID dari mesin = ID PIN Employee
     timestamp = models.DateTimeField()
     verify_type = models.CharField(max_length=10, null=True, blank=True)
     status = models.CharField(max_length=10, null=True, blank=True)
