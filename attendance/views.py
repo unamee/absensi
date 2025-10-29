@@ -1,11 +1,12 @@
 import openpyxl
+from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from django.utils import timezone
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from .models import Attendance
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def attendance_list(request):
@@ -42,7 +43,7 @@ def attendance_list(request):
 
     # ✅ Render partial jika via HTMX
     if request.headers.get("HX-Request") and "partial" in request.GET:
-        return render(request, "attendance/_attendance_table.html", context)
+        return render(request, "attendance/partial/_attendance_table.html", context)
 
     # ✅ Render full page saat normal
     return render(request, "attendance/attendances_list.html", context)
@@ -131,6 +132,7 @@ def attendance_export_excel(request):
     #     ws.column_dimensions[column_letter].width = adjusted_width
 
     from openpyxl.utils import get_column_letter
+
     for i, column_cells in enumerate(
         ws.iter_cols(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column),
         start=1,
@@ -210,3 +212,5 @@ def daily_report(request):
         "report": report,
     }
     return render(request, "attendance/daily_report.html", context)
+
+

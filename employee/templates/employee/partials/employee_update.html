@@ -1,165 +1,122 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-10">
       <div class="card shadow-lg border-0 rounded-3">
         <div class="card-header bg-primary text-white">
           <h4 class="mb-0">Update Employee: {{ employee.username }}</h4>
         </div>
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">User Information</h5>
-            <form
-              hx-post="{% url 'update-employee' employee.employee.id %}"
-              hx-target="#content"
-              hx-swap="innerHTML"
-              enctype="multipart/form-data"
-            >
-              {% csrf_token %}
-              <div class="mb-3">
-                <label for="nameInput" class="form-label">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="username"
-                  placeholder="Enter your Username"
-                  name="username"
-                  value="{{ employee.username }}"
-                />
+
+        <div class="card-body">
+          <form
+            hx-post="{% url 'update-employee' employee.employee.id %}"
+            hx-target="#content"
+            hx-swap="innerHTML"
+            enctype="multipart/form-data"
+          >
+            {% csrf_token %}
+            <div class="row g-3">
+              <!-- Kolom Kiri -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Username</label>
+                  <input type="text" name="username" class="form-control"
+                         value="{{ employee.username }}" required />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Password</label>
+                  <input type="password" name="password" class="form-control"
+                         placeholder="Leave blank to keep current password" />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">ID Karyawan</label>
+                  <input type="text" name="id_karyawan" class="form-control"
+                         value="{{ employee.employee.id_karyawan }}" required />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">ID PIN</label>
+                  <input type="text" name="id_pin" class="form-control"
+                         value="{{ employee.employee.id_pin }}" />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Department</label>
+                  <select name="dept" class="form-select">
+                    <option value="">-- Pilih Department --</option>
+                    {% for d in depts %}
+                      <option value="{{ d.id_dept }}"
+                        {% if d.id_dept == employee.employee.dept_id %}selected{% endif %}>
+                        {{ d.nama_dept }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
               </div>
-              <div class="mb-3">
-                <label for="nameInput" class="form-label">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="password"
-                  placeholder="Enter your password"
-                  name="password"
-                />
+
+              <!-- Kolom Kanan -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">First Name</label>
+                  <input type="text" name="first_name" class="form-control"
+                         value="{{ employee.first_name }}" required />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" name="last_name" class="form-control"
+                         value="{{ employee.last_name }}" />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Jabatan</label>
+                  <select name="jabatan" class="form-select">
+                    <option value="">-- Pilih Jabatan --</option>
+                    {% for j in jabatan %}
+                      <option value="{{ j.id_jabatan }}"
+                        {% if j.id_jabatan == employee.employee.jabatan_id %}selected{% endif %}>
+                        {{ j.nama_jabatan }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" name="email" class="form-control"
+                         value="{{ employee.email }}" required />
+                </div>
+
+                <!-- Foto -->
+                <div class="mb-3 text-center">
+                  <label class="form-label fw-bold">Current Photo</label><br />
+                  <img src="{{ employee.employee.photo.url }}"
+                       alt="Employee Photo"
+                       class="img-thumbnail mb-2"
+                       style="width: 150px; height: 150px; object-fit: cover" />
+                  <input type="file" name="photo" class="form-control mt-2"
+                         accept="image/*" />
+                </div>
               </div>
-              <div class="mb-3">
-                <label for="nameInput" class="form-label">ID Karyawan</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="id_karyawan"
-                  placeholder="Enter your ID Karyawan"
-                  name="id_karyawan"
-                  value="{{ employee.employee.id_karyawan }}"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="nameInput" class="form-label">ID PIN</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="id_pin"
-                  placeholder="Enter your ID PIN"
-                  name="id_pin"
-                  value="{{ employee.employee.id_pin }}"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="dept" class="form-label">Department</label>
-                <select name="dept" id="dept" class="form-select">
-                  <option value="">-- Pilih Department --</option>
-                  {% for d in depts %} {% if d.id_dept == employee.employee.dept_id %}
-                  <option value="{{ d.id_dept }}" selected>
-                    {{ d.nama_dept }}
-                  </option>
-                  {% else %}
-                  <option value="{{ d.id_dept }}">{{ d.nama_dept }}</option>
-                  {% endif %} {% endfor %}
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="jabatan" class="form-label">Jabatan</label>
-                <select name="jabatan" id="jabatan" class="form-select">
-                  <option value="">-- Pilih Jabatan --</option>
-                  {% for d in jabatan %}
-                    {% if d.id_jabatan == employee.employee.jabatan_id %}
-                    <option value="{{ d.id_jabatan }}" selected>
-                      {{ d.nama_jabatan }}
-                      {% else %}
-                    <option value="{{ d.id_jabatan }}">
-                      {{ d.nama_jabatan }}
-                    </option>
-                    {% endif %}
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="nameInput" class="form-label">First Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="firstname"
-                  placeholder="Enter your first name"
-                  name="first_name"
-                  value="{{ employee.first_name }}"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="nameInput" class="form-label">Last Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="lastname"
-                  name="last_name"
-                  placeholder="Enter your last name"
-                  value="{{ employee.last_name }}"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="emailInput" class="form-label">Email address</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="emailInput"
-                  name="email"
-                  placeholder="name@example.com"
-                  value="{{ employee.email }}"
-                />
-              </div>
-              <!-- Foto -->
-              <div class="mb-3 text-center">
-                <label class="form-label fw-bold">Current Photo</label><br />
-                <img
-                  src="{{ employee.employee.photo.url }}"
-                  alt="Employee Photo"
-                  class="img-thumbnail mb-2"
-                  style="width: 150px; height: 150px; object-fit: cover"
-                />
-                <input
-                  type="file"
-                  class="form-control mt-2"
-                  name="photo"
-                  accept="image/*"
-                />
-              </div>
-              {% comment %}
-              <div class="mb-3">
-                <label for="messageTextarea" class="form-label">Message</label>
-                <textarea
-                  class="form-control"
-                  id="messageTextarea"
-                  rows="3"
-                ></textarea>
-              </div>
-              {% endcomment %}
-              <a
-                href="#"
-                hx-get="{% url 'employee' %}"
-                hx-target="#content"
-                hx-swap="innerHTML"
-                class="btn btn-info"
-                >Cancel</a
-              >
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-          </div>
+            </div>
+
+            <!-- Tombol Submit -->
+            <div class="text-end mt-4">
+              <a href="#"
+                 hx-get="{% url 'employee' %}"
+                 hx-target="#content"
+                 hx-swap="innerHTML"
+                 class="btn btn-secondary me-2">
+                Cancel
+              </a>
+              <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+          </form>
         </div>
+
         {% if form.errors %}
-        <div class="alert alert-danger">{{ form.errors }}</div>
+        <div class="alert alert-danger m-3">{{ form.errors }}</div>
         {% endif %}
       </div>
     </div>

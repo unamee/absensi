@@ -209,7 +209,7 @@
                       >Shift</a
                     >
                   </li>
-                 
+
                   <li>
                     <a
                       href="#"
@@ -244,11 +244,12 @@
                     <a
                       href="#"
                       class="nav-link"
-                      hx-get="/reports/daily/"
+                      hx-get="{% url 'attendance_report' %}"
                       hx-target="#content"
                       hx-swap="innerHTML"
-                      >Daily</a
                     >
+                      📅 Laporan Absensi
+                    </a>
                   </li>
                   <li>
                     <a

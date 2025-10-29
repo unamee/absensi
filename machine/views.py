@@ -197,9 +197,9 @@ def machine_pull_day(request, pk):
     )
     return HttpResponse(html)
 
+
 def machine_sync_users(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
-    #employee = Employee.objects.filter(id_pin=str(log.user_id)).first()
 
     # ✅ Pastikan mesin terkoneksi
     if machine.status != 'Y':
@@ -222,6 +222,9 @@ def machine_sync_users(request, pk):
                 skipped += 1
                 continue
 
+            # ✅ Pastikan id_karyawan unik (gunakan ID mesin)
+            new_id_karyawan = f"PIN{user_id}"
+
             # ✅ Buat user Django dasar (opsional)
             django_user, _ = User.objects.get_or_create(
                 username=f"user_{user_id}",
@@ -231,9 +234,10 @@ def machine_sync_users(request, pk):
                 },
             )
 
-            # ✅ Simpan ke Employee
+            # ✅ Simpan ke Employee dengan id_karyawan unik
             emp = Employee(
                 user=django_user,
+                id_karyawan=new_id_karyawan,
                 id_pin=user_id,
             )
             emp.save()
@@ -249,3 +253,56 @@ def machine_sync_users(request, pk):
         messages.error(request, f"❌ Gagal sinkronisasi: {e}")
 
     return redirect('machine_list')
+
+# def machine_sync_users(request, pk):
+#     machine = get_object_or_404(Machine, pk=pk)
+#     #employee = Employee.objects.filter(id_pin=str(log.user_id)).first()
+
+#     # ✅ Pastikan mesin terkoneksi
+#     if machine.status != 'Y':
+#         messages.error(request, f"❌ Mesin {machine.name} belum terkoneksi.")
+#         return redirect('machine_list')
+
+#     try:
+#         zk = ZK(machine.ip_address, port=4370, timeout=5)
+#         conn = zk.connect()
+#         users = conn.get_users()  # ambil semua user di mesin
+
+#         imported, skipped = 0, 0
+
+#         for u in users:
+#             user_id = str(u.user_id).strip()
+#             name = u.name.strip() if u.name else f"User_{user_id}"
+
+#             # ❌ Skip jika user_id sudah ada di Employee
+#             if Employee.objects.filter(id_pin=user_id).exists():
+#                 skipped += 1
+#                 continue
+
+#             # ✅ Buat user Django dasar (opsional)
+#             django_user, _ = User.objects.get_or_create(
+#                 username=f"user_{user_id}",
+#                 defaults={
+#                     "first_name": name,
+#                     "is_active": True,
+#                 },
+#             )
+
+#             # ✅ Simpan ke Employee
+#             emp = Employee(
+#                 user=django_user,
+#                 id_pin=user_id,
+#             )
+#             emp.save()
+#             imported += 1
+
+#         conn.disconnect()
+#         messages.success(
+#             request,
+#             f"✅ Sinkronisasi selesai. {imported} user baru ditambahkan, {skipped} dilewati."
+#         )
+
+#     except Exception as e:
+#         messages.error(request, f"❌ Gagal sinkronisasi: {e}")
+
+#     return redirect('machine_list')

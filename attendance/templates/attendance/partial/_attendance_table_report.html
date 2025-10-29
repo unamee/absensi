@@ -1,0 +1,85 @@
+{% load dict_extras %}
+
+<div id="report-table" class="table-responsive">
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark text-center">
+      <tr>
+        <th>No</th>
+        <th>ID Karyawan</th>
+        <th>Nama</th>
+        <th>Dept</th>
+        <th>Jabatan</th>
+        {% for d in tanggal_list %}
+        <th>{{ d|date:"d-M" }}</th>
+        {% endfor %}
+        <th>Total Hadir</th>
+        <th>Total Alpha</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp_id, data in report.items %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ emp_id }}</td>
+        <td>{{ data.nama }}</td>
+        <td>{{ data.dept }}</td>
+        <td>{{ data.jabatan }}</td>
+        {% for d in tanggal_list %} 
+        {% with data.harian|get_item:d as info %} 
+          {% if info %}
+          <td>{{ info.masuk }} - {{ info.pulang }}</td>
+          {% else %}
+          <td></td>
+          {% endif %} 
+        {% endwith %}
+        {% endfor %} 
+        
+        {% comment %} {% for date, info
+        in data.harian.items %}
+        <td>{{ info.masuk }} - {{ info.pulang }}</td>
+        {% endfor %} {% endcomment %}
+        <td>{{ data.harian|length }}</td>
+        <td>0</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="10" class="text-center text-muted">
+          Tidak ada data absensi
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+
+    {% comment %}
+    <tbody>
+      {% for emp_id, data in report.items %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ emp_id }}</td>
+        <td>{{ data.nama }}</td>
+        <td>{{ data.dept }}</td>
+        <td>{{ data.jabatan }}</td>
+
+        {% for d in tanggal_list %} {% if d in data.harian %}
+        <td>{{ data.harian.d.masuk }} - {{ data.harian.d.pulang }}</td>
+        {% else %}
+        <td></td>
+        {% endif %} {% endfor %}
+
+        <td>{{ data.harian|length }}</td>
+        <td>{{ tanggal_list|length|add:-data.harian|length }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td
+          colspan="{{ 6|add:tanggal_list|length }}"
+          class="text-center text-muted"
+        >
+          Tidak ada data absensi
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    {% endcomment %}
+  </table>
+</div>

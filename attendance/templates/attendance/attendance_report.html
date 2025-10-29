@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <h4>📅 Laporan Absensi</h4>
+
+  <form
+    hx-get="{% url 'attendance_report' %}?partial=1"
+    hx-target="#report-table"
+    hx-swap="outerHTML"
+    class="row g-2 align-items-end mb-3"
+  >
+    <div class="col-md-3">
+      <label for="start_date" class="form-label">Dari Tanggal</label>
+      <input
+        type="date"
+        name="start_date"
+        id="start_date"
+        value="{{ start_date|date:'Y-m-d' }}"
+        class="form-control"
+      />
+    </div>
+    <div class="col-md-3">
+      <label for="end_date" class="form-label">Sampai Tanggal</label>
+      <input
+        type="date"
+        name="end_date"
+        id="end_date"
+        value="{{ end_date|date:'Y-m-d' }}"
+        class="form-control"
+      />
+    </div>
+    <div class="col-md-6 d-flex gap-2">
+      <button type="submit" class="btn btn-primary mt-4">Tampilkan</button>
+      <a
+        href="{% url 'attendance_report' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&export=excel"
+        class="btn btn-success mt-4"
+      >
+        <i class="fa fa-file-excel"></i> Export Excel
+      </a>
+    </div>
+  </form>
+
+  <div id="attendance-table">
+    {% include "attendance/partial/_attendance_table_report.html" %}
+  </div>
+</div>
+
