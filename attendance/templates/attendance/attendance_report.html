@@ -1,5 +1,88 @@
 <div class="container mt-4">
   <h4>📅 Laporan Absensi</h4>
+  {% comment %} <p>Jumlah Dept: {{ depts|length }}</p> {% endcomment %}
+
+  <form  
+    hx-get="{% url 'attendance_report' %}"
+    hx-include="[name='dept'], [name='start_date'], [name='end_date']"
+    hx-params="*"
+    hx-target="#attendance-table"    
+    hx-swap="innerHTML"
+    class="row g-2 align-items-end mb-3"
+  ><input type="hidden" name="partial" value="1">
+    <!-- Filter Departemen -->
+    <div class="col-md-3">
+      <label for="dept" class="form-label">Departemen</label>
+      <select name="dept" id="dept" class="form-select" required>
+        <option value="">-- Pilih Departemen --</option>
+        {% for d in depts %}       
+        <option value="{{ d.id_dept }}" {% if d.id_dept|stringformat:'s' == selected_dept|stringformat:'s' %}selected{% endif %} > {{ d.nama_dept }} </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Filter Tanggal Mulai -->
+    <div class="col-md-3">
+      <label for="start_date" class="form-label">Dari Tanggal</label>
+      <input
+        type="date"
+        name="start_date"
+        id="start_date"
+        value="{{ start_date|date:'Y-m-d' }}"
+        class="form-control"
+      />
+    </div>
+
+    <!-- Filter Tanggal Akhir -->
+    <div class="col-md-3">
+      <label for="end_date" class="form-label">Sampai Tanggal</label>
+      <input
+        type="date"
+        name="end_date"
+        id="end_date"
+        value="{{ end_date|date:'Y-m-d' }}"
+        class="form-control"
+      />
+    </div>
+
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary mt-4 w-100">
+        <i class="fa fa-filter"></i> Tampilkan
+      </button>
+      {% if report and selected_dept and start_date and end_date %}
+      <a
+        href="{% url 'attendance_report' %}?dept={{ selected_dept }}&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&export=excel"
+        class="btn btn-success mt-4 w-100"
+      >
+        <i class="fa fa-file-excel"></i> Export Excel
+      </a>
+      {% endif %}
+
+    </div>
+  </form>
+
+  <!-- loader -->
+<div id="htmx-loader" class="text-center mt-2" style="display: none;">
+  <div class="spinner-border text-primary" role="status"></div>
+  <small class="text-muted ms-2">Memuat data...</small>
+</div>
+
+  <!-- Table hanya muncul kalau data sudah difilter -->
+  <div id="attendance-table">
+    {% if report %}
+    {% include "attendance/partial/_attendance_table_report.html" %}
+    {% include "attendance/partial/_export_button.html" %}
+  {% else %}
+    <div class="alert alert-info text-center mt-3">
+      💡 Silakan pilih Departemen dan rentang tanggal untuk menampilkan laporan absensi.
+    </div>
+  {% endif %}
+  </div>
+</div>
+
+{% comment %} 
+<div class="container mt-4">
+  <h4>📅 Laporan Absensi</h4>
 
   <form
     hx-get="{% url 'attendance_report' %}?partial=1"
@@ -41,5 +124,16 @@
   <div id="attendance-table">
     {% include "attendance/partial/_attendance_table_report.html" %}
   </div>
-</div>
+</div> {% endcomment %}
+
+
+
+<script>
+document.body.addEventListener("htmx:beforeRequest", () => {
+  document.getElementById("htmx-loader").style.display = "block";
+});
+document.body.addEventListener("htmx:afterRequest", () => {
+  document.getElementById("htmx-loader").style.display = "none";
+});
+</script>
 

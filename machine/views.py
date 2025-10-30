@@ -254,55 +254,106 @@ def machine_sync_users(request, pk):
 
     return redirect('machine_list')
 
-# def machine_sync_users(request, pk):
-#     machine = get_object_or_404(Machine, pk=pk)
-#     #employee = Employee.objects.filter(id_pin=str(log.user_id)).first()
 
-#     # ✅ Pastikan mesin terkoneksi
-#     if machine.status != 'Y':
-#         messages.error(request, f"❌ Mesin {machine.name} belum terkoneksi.")
-#         return redirect('machine_list')
+def machine_pull_range_modal(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    return render(request, "machine/machine_pull_range_modal.html", {"machine": machine})
 
-#     try:
-#         zk = ZK(machine.ip_address, port=4370, timeout=5)
-#         conn = zk.connect()
-#         users = conn.get_users()  # ambil semua user di mesin
 
-#         imported, skipped = 0, 0
+def machine_pull_range(request, pk):
+    machine = get_object_or_404(Machine, pk=pk)
+    zk = ZK(machine.ip_address, port=4370, timeout=5)
+    pulled, missing_users = 0, set()
+    filename = None
 
-#         for u in users:
-#             user_id = str(u.user_id).strip()
-#             name = u.name.strip() if u.name else f"User_{user_id}"
+    print("📥 masuk ke machine_pull_range")
 
-#             # ❌ Skip jika user_id sudah ada di Employee
-#             if Employee.objects.filter(id_pin=user_id).exists():
-#                 skipped += 1
-#                 continue
+    if request.method == "POST":
+        start_str = request.POST.get("start_date")
+        end_str = request.POST.get("end_date")
 
-#             # ✅ Buat user Django dasar (opsional)
-#             django_user, _ = User.objects.get_or_create(
-#                 username=f"user_{user_id}",
-#                 defaults={
-#                     "first_name": name,
-#                     "is_active": True,
-#                 },
-#             )
+        print(f"📅 Range diterima: {start_str} s.d {end_str}")
 
-#             # ✅ Simpan ke Employee
-#             emp = Employee(
-#                 user=django_user,
-#                 id_pin=user_id,
-#             )
-#             emp.save()
-#             imported += 1
+        # Validasi input
+        if not start_str or not end_str:
+            messages.error(request, "❌ Harap pilih rentang tanggal.")
+            return render(
+                request,
+                "machine/machine_list.html",
+                {"machines": Machine.objects.all()},
+            )
 
-#         conn.disconnect()
-#         messages.success(
-#             request,
-#             f"✅ Sinkronisasi selesai. {imported} user baru ditambahkan, {skipped} dilewati."
-#         )
+        try:
+            start_date = datetime.strptime(start_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_str, "%Y-%m-%d")
 
-#     except Exception as e:
-#         messages.error(request, f"❌ Gagal sinkronisasi: {e}")
+            # Pastikan aware timezone
+            start = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+            end = timezone.make_aware(datetime.combine(end_date, datetime.max.time()))
 
-#     return redirect('machine_list')
+            conn = zk.connect()
+            print("🔌 Connected to:", machine.ip_address)
+            logs = conn.get_attendance()
+            print("📋 Total logs fetched:", len(logs))
+
+            for log in logs:
+                log_time = (
+                    timezone.make_aware(log.timestamp)
+                    if timezone.is_naive(log.timestamp)
+                    else log.timestamp
+                )
+
+                # ✅ filter hanya log di dalam rentang tanggal
+                if start.date() <= log_time.date() <= end.date():
+                    employee = Employee.objects.filter(
+                        id_pin=str(log.user_id)
+                    ).first()
+
+                    Attendance.objects.get_or_create(
+                        machine=machine,
+                        user_id=str(log.user_id),
+                        timestamp=log_time,
+                        defaults={
+                            "verify_type": getattr(log, "status", ""),
+                            "status": getattr(log, "punch", ""),
+                            "employee": employee,
+                        },
+                    )
+                    pulled += 1
+                    if not employee:
+                        missing_users.add(str(log.user_id))
+
+            conn.disconnect()
+
+            # Simpan missing user ke file
+            if missing_users:
+                reports_dir = os.path.join(settings.MEDIA_ROOT, "reports")
+                os.makedirs(reports_dir, exist_ok=True)
+                filename = f"missing_users_{machine.name}_{start_str}_to_{end_str}.txt"
+                file_path = os.path.join(reports_dir, filename)
+                with open(file_path, "w") as f:
+                    f.write("Daftar user_id dari mesin yang tidak ditemukan:\n")
+                    for uid in sorted(missing_users):
+                        f.write(f"{uid}\n")
+
+            messages.success(
+                request,
+                f"✅ {pulled} data berhasil ditarik dari mesin {machine.name} ({start_str} s.d {end_str}).",
+            )
+            if missing_users:
+                messages.warning(
+                    request,
+                    f"⚠️ {len(missing_users)} user tidak ditemukan. Silakan download laporan.",
+                )
+
+        except Exception as e:
+            messages.error(request, f"❌ Gagal menarik data: {e}")
+
+    # 🔁 Render ulang tabel mesin (HTMX)
+    machines = Machine.objects.all()
+    html = render_to_string(
+        "machine/_machine_table.html",
+        {"machines": machines, "missing_file": filename},
+        request,
+    )
+    return HttpResponse(html)

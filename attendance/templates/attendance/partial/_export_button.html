@@ -1,0 +1,10 @@
+{% if report and selected_dept and start_date and end_date %}
+<div class="text-end mt-3">
+  <a
+    href="{% url 'attendance_report' %}?dept={{ selected_dept }}&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&export=excel"
+    class="btn btn-success"
+  >
+    <i class="fa fa-file-excel"></i> Export Excel
+  </a>
+</div>
+{% endif %}

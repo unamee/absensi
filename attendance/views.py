@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from .models import Attendance
+from dept.models import Dept
 from datetime import datetime, timedelta
 
 
@@ -47,7 +48,6 @@ def attendance_list(request):
 
     # ✅ Render full page saat normal
     return render(request, "attendance/attendances_list.html", context)
-
 
 def attendance_export_excel(request):
     start_date = request.GET.get("start_date")

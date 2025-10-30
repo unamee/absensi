@@ -35,6 +35,18 @@
     >
       🕒 Tarik Data Harian
     </a>
+    {% endif %} {% if m.status == 'Y' %}
+    <a
+      href="#"
+      hx-get="{% url 'machine_pull_range_modal' m.id %}"
+      hx-target="#modal-body"
+      hx-swap="innerHTML"
+      data-bs-toggle="modal"
+      data-bs-target="#confirmModal"
+      class="btn btn-sm btn-info"
+    >
+      📆 Tarik Data Range
+    </a>
     {% endif %}
 
     <!-- Tombol edit & delete disabled -->
