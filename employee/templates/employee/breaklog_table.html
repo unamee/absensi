@@ -52,37 +52,4 @@
   </div>
 </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Jika halaman dimuat langsung
-    if ($.fn.DataTable.isDataTable("#breaklogTable")) {
-      $("#breaklogTable").DataTable().destroy();
-    }
-    $("#breaklogTable").DataTable({
-      pageLength: 25,
-      order: [[0, "desc"]],
-      language: {
-        search: "Cari:",
-        lengthMenu: "Tampilkan _MENU_ data per halaman",
-        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-        paginate: {
-          previous: "Sebelumnya",
-          next: "Berikutnya",
-        },
-      },
-    });
-  });
 
-  // Jika halaman ini dimuat via HTMX
-  document.body.addEventListener("htmx:afterSwap", function (evt) {
-    if (evt.detail.target.id === "content") {
-      if ($.fn.DataTable.isDataTable("#breaklogTable")) {
-        $("#breaklogTable").DataTable().destroy();
-      }
-      $("#breaklogTable").DataTable({
-        pageLength: 25,
-        order: [[0, "desc"]],
-      });
-    }
-  });
-</script>
