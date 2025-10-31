@@ -38,4 +38,7 @@ urlpatterns = [
     # 🔽 Fitur lainnya
     path("machine/missing/<str:filename>/", download_missing_file, name="download_missing_file"),
     path("machine/<int:pk>/sync-users/", views.machine_sync_users, name="machine_sync_users"),
+
+    path("machine/qr-attendance/", views.qr_attendance_form, name="qr_attendance_form"),
+    path("machine/qr-attendance/submit/", views.qr_attendance_submit, name="qr_attendance_submit"),
 ]

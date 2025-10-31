@@ -21,12 +21,12 @@ def dashboard(request):
 
 @login_required_nocache
 def break_scan(request):
-    print("📡 Request received:", request.method)
+    #print("📡 Request received:", request.method)
     message = None
 
     if request.method == "POST":
         qr_code = request.POST.get("qr_code", "").strip()
-        print("🔹 Scanned:", qr_code)
+        #print("🔹 Scanned:", qr_code)
 
         try:
             emp = Employee.objects.get(id_karyawan=qr_code)
@@ -119,6 +119,7 @@ def employee_update(request, emp_id):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "").strip()
         photo = request.FILES.get("photo")
+        can_qr_attend = bool(request.POST.get("can_qr_attend"))
 
         # Cek perubahan ID karyawan → regen QR
         if id_karyawan != employee.id_karyawan:
@@ -130,6 +131,7 @@ def employee_update(request, emp_id):
         employee.id_pin = id_pin
         employee.dept = dept_instance
         employee.jabatan = jabatan_instance
+        employee.can_qr_attend = can_qr_attend
 
         user.first_name = first_name
         user.last_name = last_name
@@ -165,7 +167,6 @@ def employee_update(request, emp_id):
         'jabatan': jabatan,
     }
     return render(request, "employee/partials/employee_update.html", context)
-
 
 
 # Delete Jabatan

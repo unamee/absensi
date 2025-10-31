@@ -30,6 +30,7 @@ class Employee(models.Model):
         null=True,
         validators=[validate_image],
     )
+    can_qr_attend = models.BooleanField(default=False, help_text="Jika True, karyawan ini bisa absen menggunakan QR Code")
 
     # def __str__(self) -> str:
     #     return f"{self.user.username} - {self.id_karyawan}"

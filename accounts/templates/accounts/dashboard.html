@@ -28,6 +28,7 @@
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
+
     <style>
       body {
         overflow-x: hidden;
@@ -142,6 +143,7 @@
                 </ul>
               </div>
             </li>
+
             <!-- Hanya tampil jika bukan user 'security' -->
             {% if request.user.username != "security" %}
             <!-- Dropdown Menu -->
@@ -223,7 +225,7 @@
                   </li>
                 </ul>
               </div>
-            </li>
+            </li>          
 
             <!-- Dropdown Menu -->
             <li class="nav-item">
@@ -250,21 +252,42 @@
                     >
                       📅 Laporan Absensi
                     </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      class="nav-link"
-                      hx-get="/reports/monthly/"
-                      hx-target="#content"
-                      hx-swap="innerHTML"
-                      >Monthly</a
-                    >
-                  </li>
+                  </li>                 
                 </ul>
               </div>
             </li>
             {% endif %}
+
+            <!-- Dropdown Menu -->
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                data-bs-toggle="collapse"
+                href="#reportsMenu"
+                role="button"
+                aria-expanded="false"
+              >
+                📊 Operational ▾
+              </a>
+              <div class="collapse" id="reportsMenu">
+                <ul
+                  class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3"
+                >
+                  <li>
+                    <a
+                      href="#"
+                      class="nav-link"
+                      hx-get="{% url 'qr_attendance_form' %}"
+                      hx-target="#content"
+                      hx-swap="innerHTML"
+                    >
+                      📅 Absen QR
+                    </a>
+                  </li>                  
+                </ul>
+              </div>
+            </li>
+
             <li class="nav-item mt-3">
               <a href="{% url 'logout' %}" class="btn btn-danger w-100"
                 >Logout</a

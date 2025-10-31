@@ -2,11 +2,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from .models import Shift
 from .forms import ShiftForm
+from accounts.utils import login_required_nocache
 
+@login_required_nocache
 def shift_list(request):
     shifts = Shift.objects.all().order_by('name')
     return render(request, 'shift/shift_list.html', {'shifts': shifts})
 
+@login_required_nocache
 def shift_create(request):
     if request.method == 'POST':
         form = ShiftForm(request.POST)
@@ -28,17 +31,7 @@ def shift_create(request):
 
     return render(request, 'shift/shift_form.html', {'form': form})
 
-# def shift_create(request):
-#     if request.method == 'POST':
-#         form = ShiftForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request, "✅ Shift berhasil ditambahkan.")
-#             return redirect('shift_list')
-#     else:
-#         form = ShiftForm()
-#     return render(request, 'shift/shift_form.html', {'form': form})
-
+@login_required_nocache
 def shift_edit(request, pk):
     shift = get_object_or_404(Shift, pk=pk)
     if request.method == 'POST':
@@ -51,12 +44,7 @@ def shift_edit(request, pk):
         form = ShiftForm(instance=shift)
     return render(request, 'shift/shift_form.html', {'form': form})
 
-# def shift_delete(request, pk):
-#     shift = get_object_or_404(Shift, pk=pk)
-#     shift.delete()
-#     messages.warning(request, "🗑 Shift telah dihapus.")
-#     return redirect('shift_list')
-
+@login_required_nocache
 def shift_delete(request, pk):
     shift = get_object_or_404(Shift, pk=pk)
     if request.method == "DELETE":

@@ -53,6 +53,17 @@
                     {% endfor %}
                   </select>
                 </div>
+
+                <!-- ✅ Checkbox baru -->
+                <div class="form-check mt-3 text-start">
+                  <input type="checkbox" class="form-check-input" 
+                        id="can_qr_attend" 
+                        name="can_qr_attend" 
+                        {% if employee.employee.can_qr_attend %}checked{% endif %}>
+                  <label class="form-check-label" for="can_qr_attend">
+                    Boleh absen menggunakan QR Code
+                  </label>
+                </div>
               </div>
 
               <!-- Kolom Kanan -->
@@ -85,7 +96,7 @@
                 <div class="mb-3">
                   <label class="form-label">Email</label>
                   <input type="email" name="email" class="form-control"
-                         value="{{ employee.email }}" required />
+                         value="{{ employee.email }}" />
                 </div>
 
                 <!-- Foto -->
@@ -98,6 +109,8 @@
                   <input type="file" name="photo" class="form-control mt-2"
                          accept="image/*" />
                 </div>
+
+                
               </div>
             </div>
 

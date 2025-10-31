@@ -4,12 +4,14 @@ from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from django.utils import timezone
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Attendance
+from accounts.utils import login_required_nocache
 from dept.models import Dept
 from datetime import datetime, timedelta
 
 
+@login_required_nocache
 def attendance_list(request):
     from_date_str = request.GET.get("from_date")
     to_date_str = request.GET.get("to_date")
@@ -49,6 +51,8 @@ def attendance_list(request):
     # ✅ Render full page saat normal
     return render(request, "attendance/attendances_list.html", context)
 
+
+@login_required_nocache
 def attendance_export_excel(request):
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
@@ -116,20 +120,7 @@ def attendance_export_excel(request):
                 r.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                 r.status or "-",
             ]
-        )
-
-    # Auto width
-    # for column in ws.columns:
-    #     max_length = 0
-    #     column_letter = column[0].column_letter
-    #     for cell in column:
-    #         try:
-    #             if len(str(cell.value)) > max_length:
-    #                 max_length = len(str(cell.value))
-    #         except:
-    #             pass
-    #     adjusted_width = max_length + 2
-    #     ws.column_dimensions[column_letter].width = adjusted_width
+        )  
 
     from openpyxl.utils import get_column_letter
 
@@ -160,7 +151,7 @@ def attendance_export_excel(request):
 
     return response
 
-
+@login_required_nocache
 def daily_report(request):
     # ambil tanggal dari parameter GET atau gunakan hari ini
     date_str = request.GET.get("date")
@@ -212,5 +203,3 @@ def daily_report(request):
         "report": report,
     }
     return render(request, "attendance/daily_report.html", context)
-
-

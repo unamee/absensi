@@ -29,7 +29,7 @@ def attendance_report(request):
         timestamp__date__range=(start_date, end_date)
     ).select_related("employee", "employee__dept", "employee__jabatan")
 
-    print(selected_dept)
+    #print(selected_dept)
 
     # filter dept hanya jika valid
     if selected_dept and selected_dept.isdigit():

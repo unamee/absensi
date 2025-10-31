@@ -7,15 +7,19 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from attendance.models import Machine, Connect, Attendance
 from employee.models import Employee
+from django.views.decorators.http import require_POST
 from .forms import MachineForm
+from accounts.utils import login_required_nocache
 from zk import ZK  # library pyzk untuk koneksi mesin
 
 
+@login_required_nocache
 def machine_list(request):
     machines = Machine.objects.all()
     return render(request, "machine/machine_list.html", {"machines": machines})
 
 
+@login_required_nocache
 def machine_create(request):
     if request.method == "POST":
         form = MachineForm(request.POST)
@@ -28,6 +32,7 @@ def machine_create(request):
     return render(request, "machine/machine_form.html", {"form": form})
 
 
+@login_required_nocache
 def machine_edit(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
     if request.method == "POST":
@@ -42,12 +47,14 @@ def machine_edit(request, pk):
     return render(request, "machine/machine_form.html", {"form": form})
 
 
+@login_required_nocache
 def machine_confirm_delete(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
     html = render_to_string("machine/_confirm_delete.html", {"machine": machine})
     return HttpResponse(html)
 
 
+@login_required_nocache
 def machine_delete(request, pk):
     if request.method == "POST":
         machine = get_object_or_404(Machine, pk=pk)
@@ -56,6 +63,7 @@ def machine_delete(request, pk):
     return HttpResponse(status=405)
 
 
+@login_required_nocache
 def machine_connect(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
     zk = ZK(machine.ip_address, port=4370, timeout=5)
@@ -74,6 +82,7 @@ def machine_connect(request, pk):
     return redirect("machine_list")
 
 
+@login_required_nocache
 def machine_toggle_connect(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
     zk = ZK(machine.ip_address, port=4370, timeout=5)
@@ -98,11 +107,13 @@ def machine_toggle_connect(request, pk):
     return render(request, "machine/_machine_row.html", {"m": machine})
 
 
+@login_required_nocache
 def machine_pull_day_modal(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
     return render(request, "machine/_pull_day_modal.html", {"machine": machine})
 
 
+@login_required_nocache
 def machine_pull_day(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
     zk = ZK(machine.ip_address, port=4370, timeout=5)
@@ -145,9 +156,7 @@ def machine_pull_day(request, pk):
                     print(
                         f"🕒 Log ditemukan: user_id={log.user_id}, timestamp={log_time}"
                     )
-                    employee = Employee.objects.filter(
-                        id_pin=str(log.user_id)
-                    ).first()
+                    employee = Employee.objects.filter(id_pin=str(log.user_id)).first()
 
                     Attendance.objects.get_or_create(
                         machine=machine,
@@ -198,13 +207,14 @@ def machine_pull_day(request, pk):
     return HttpResponse(html)
 
 
+@login_required_nocache
 def machine_sync_users(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
 
     # ✅ Pastikan mesin terkoneksi
-    if machine.status != 'Y':
+    if machine.status != "Y":
         messages.error(request, f"❌ Mesin {machine.name} belum terkoneksi.")
-        return redirect('machine_list')
+        return redirect("machine_list")
 
     try:
         zk = ZK(machine.ip_address, port=4370, timeout=5)
@@ -246,20 +256,24 @@ def machine_sync_users(request, pk):
         conn.disconnect()
         messages.success(
             request,
-            f"✅ Sinkronisasi selesai. {imported} user baru ditambahkan, {skipped} dilewati."
+            f"✅ Sinkronisasi selesai. {imported} user baru ditambahkan, {skipped} dilewati.",
         )
 
     except Exception as e:
         messages.error(request, f"❌ Gagal sinkronisasi: {e}")
 
-    return redirect('machine_list')
+    return redirect("machine_list")
 
 
+@login_required_nocache
 def machine_pull_range_modal(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
-    return render(request, "machine/machine_pull_range_modal.html", {"machine": machine})
+    return render(
+        request, "machine/machine_pull_range_modal.html", {"machine": machine}
+    )
 
 
+@login_required_nocache
 def machine_pull_range(request, pk):
     machine = get_object_or_404(Machine, pk=pk)
     zk = ZK(machine.ip_address, port=4370, timeout=5)
@@ -288,7 +302,9 @@ def machine_pull_range(request, pk):
             end_date = datetime.strptime(end_str, "%Y-%m-%d")
 
             # Pastikan aware timezone
-            start = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+            start = timezone.make_aware(
+                datetime.combine(start_date, datetime.min.time())
+            )
             end = timezone.make_aware(datetime.combine(end_date, datetime.max.time()))
 
             conn = zk.connect()
@@ -305,9 +321,7 @@ def machine_pull_range(request, pk):
 
                 # ✅ filter hanya log di dalam rentang tanggal
                 if start.date() <= log_time.date() <= end.date():
-                    employee = Employee.objects.filter(
-                        id_pin=str(log.user_id)
-                    ).first()
+                    employee = Employee.objects.filter(id_pin=str(log.user_id)).first()
 
                     Attendance.objects.get_or_create(
                         machine=machine,
@@ -357,3 +371,48 @@ def machine_pull_range(request, pk):
         request,
     )
     return HttpResponse(html)
+
+
+@login_required_nocache
+def qr_attendance_form(request):
+    return render(request, "machine/QR/qr_attendance_form.html")
+
+
+@login_required_nocache
+@require_POST
+def qr_attendance_submit(request):
+    qr_value = request.POST.get("qr_value", "").strip()
+
+    if not qr_value:
+        return JsonResponse(
+            {"status": "error", "message": "QR Code tidak boleh kosong."}
+        )
+
+    try:
+        employee = Employee.objects.get(id_karyawan=qr_value, can_qr_attend=True)
+    except Employee.DoesNotExist:
+        return JsonResponse(
+            {
+                "status": "error",
+                "message": "Karyawan tidak ditemukan atau tidak diizinkan absen QR.",
+            }
+        )
+
+    # Misal machine default di-set id=1
+    machine = Machine.objects.first()
+
+    Attendance.objects.create(
+        machine=machine,
+        employee=employee,
+        user_id=employee.id_pin or employee.id_karyawan,
+        timestamp=timezone.now(),
+        verify_type="QR",
+        status="IN",
+    )
+
+    return JsonResponse(
+        {
+            "status": "success",
+            "message": f"Absensi berhasil untuk {employee.user.get_full_name()} ({employee.id_karyawan})",
+        }
+    )
