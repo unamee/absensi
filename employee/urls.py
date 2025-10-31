@@ -13,6 +13,8 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard-employee"),
     path('dashboard/break-scan/', views.break_scan, name='break_scan'),
     path("dashboard/out-list/", views.out_list, name="out_list"),
+
+    path("dashboard/breaklogs/", views.breaklog_table, name="breaklog_table"),
 ]
 
 if settings.DEBUG:

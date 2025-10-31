@@ -223,3 +223,9 @@ def scan_qr(request):
         BreakLog.objects.create(employee=employee)
 
     return redirect("dashboard")
+
+@login_required_nocache
+def breaklog_table(request):
+    # Ambil 250 record pertama
+    logs = BreakLog.objects.select_related('employee__user', 'employee__dept').order_by('-out_time')[:250]
+    return render(request, "employee/breaklog_table.html", {"logs": logs})
